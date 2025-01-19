@@ -15,5 +15,4 @@ spring:
       ddl-auto: create-drop
     show-sql: false
     open-in-view: false
-server:
-  port: 8095
+  
