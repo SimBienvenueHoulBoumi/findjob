@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: rechecdi
+  datasource:
+    url: "jdbc:postgresql://database:5432/${POSTGRES_DB}"
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  sql:
+    init:
+      mode: always
+server:
+  port: ${APP_PORT}
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+springdoc:
+  api-docs:
+    enabled: true

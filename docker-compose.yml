@@ -1,0 +1,52 @@
+networks:
+  app-recherche-cdi-network:
+    driver: bridge
+
+volumes:
+  pg_data:
+  app_data:
+
+services:
+  database:
+    image: postgres:latest
+    restart: always
+    container_name: database-find-cdi
+    env_file: .env
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-recherche-cdi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      timeout: 3s
+      start_period: 20s
+
+  app:
+    build:
+      context: ./rechecdi
+      dockerfile: Dockerfile
+    container_name: springboot-app
+    restart: always
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://database:5432/${POSTGRES_DB}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD}"
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    networks:
+      - app-recherche-cdi-network
+    volumes:
+      - app_data:/app
